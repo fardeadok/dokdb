@@ -40,15 +40,15 @@ func New(fn string) *db {
 
 // ------------------------------------------------------
 //
-//	PRINT store
+//	PRINT all store
 func (d *db) Print() {
 	println("func Print store")
 
 	for k, v := range d.store {
 		println("uuid=", k)
 		println(v.lat, v.long, v.contentType)
-
 		println(v.jb)
+		println()
 	}
 }
 
