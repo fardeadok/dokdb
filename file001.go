@@ -53,6 +53,8 @@ func (d *db) Print() {
 func (d *db) AddJson(lat, long float64, ct, ds string, jr []byte) (id string) {
 	myUuid := uuid.New()
 
+	myuuidString := myUuid.String()
+
 	ov := object{}
 	ov.lat = lat
 	ov.long = long
@@ -60,9 +62,9 @@ func (d *db) AddJson(lat, long float64, ct, ds string, jr []byte) (id string) {
 	ov.description = ds
 	ov.jb = jr
 
-	d.store[id] = ov
+	d.store[myuuidString] = ov
 
-	return myUuid.String()
+	return myuuidString
 }
 
 // ------------------------------------------------------
