@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+
+	"github.com/google/uuid"
 )
 
 type object struct {
@@ -27,11 +29,21 @@ type dokdb struct {
 //	NEW
 //
 // new make new db
-func (d *dokdb) New(fn string) *dokdb {
+func New(fn string) *dokdb {
 	return &dokdb{
 		filename: fn,
 		store:    make(map[string]object),
 	}
+}
+
+// ------------------------------------------------------
+//
+//	ADD object
+//
+// Add new object
+func (d *dokdb) Add(o object) {
+	newuuid := uuid.New()
+	println(newuuid.String())
 }
 
 // ------------------------------------------------------
