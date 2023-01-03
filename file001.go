@@ -2,35 +2,55 @@ package dokdb
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"os"
 )
 
-type placeStruct struct {
+type object struct {
 	lat, long float64 `json:string` //coords
-	content   string  // type MIME Content-type  text/html image/jpg
-	jb        []byte  //raw json
-	// uj        map[string]interface{} //unmarshalled jsonb
+	// contetntype is MIME Content-type  text/html image/jpg
+	contentType string
+	// raw json byte
+	jb []byte
 }
 
 // dokdb -  struct for store json
 type dokdb struct {
+	// path to filename with raw json byte inside
 	filename string
-	fd       *os.File
-	store    map[string]placeStruct
-	//  добавить структуру с координатами
+	// string is a random UUID
+	store map[string]object
 }
 
+// ------------------------------------------------------
+//
+//	New
+//
+// new make new db
+func (d *dokdb) New(fn string) *dokdb {
+	return &dokdb{
+		filename: fn,
+		store:    make(map[string]object),
+	}
+}
+
+// ------------------------------------------------------
+//
+//	SAVE
+//
 // Save "store map[string]placestruct to filename
 func (d *dokdb) Save() (er error) {
 	println("func dokdb save")
-	fd, err := os.Create(d.filename)
 
+	fd, err := os.Create(d.filename)
 	if err != nil {
 		return err
 	}
 	defer fd.Close()
 
-	tmpJ, err := json.Marshal(d.store)
+	// записываем красиво с отступами
+	tmpJ, err := json.MarshalIndent(d.store, "", " ")
+	// tmpJ, err := json.Marshal(dstore)
 	if err != nil {
 		return err
 	}
@@ -42,11 +62,27 @@ func (d *dokdb) Save() (er error) {
 	}
 
 	println("writed to filename. len=", writedLen)
-
+	println("func Save ok")
 	return nil
 }
 
+// ------------------------------------------------------
+//
+//	LOAD
+//
 // Load - load from "filename" to "store"
 func (d *dokdb) Load(f string) (er error) {
+	println("func Load json byte from filename")
+	rawbytes, err := ioutil.ReadFile(d.filename)
+	if err != nil {
+		return err
+	}
+
+	err002 := json.Unmarshal(rawbytes, &d.store)
+	if err002 != nil {
+		return err002
+	}
+
+	println("func Load ok")
 	return nil
 }
