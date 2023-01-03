@@ -42,7 +42,13 @@ func New(fn string) *db {
 //
 //	PRINT store
 func (d *db) Print() {
-	println("print store")
+	println("func Print store")
+
+	for k, v := range d.store {
+		println("uuid=", k)
+		println(v.lat, v.long, v.contentType)
+		println(v.jb)
+	}
 }
 
 // ------------------------------------------------------
@@ -51,6 +57,7 @@ func (d *db) Print() {
 //
 // Add new json []byte  and return UUID
 func (d *db) AddJson(lat, long float64, ct, ds string, jr []byte) (id string) {
+	println("func AddJson")
 	myUuid := uuid.New()
 
 	myuuidString := myUuid.String()
