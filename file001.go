@@ -47,6 +47,7 @@ func (d *db) Print() {
 	for k, v := range d.store {
 		println("uuid=", k)
 		println(v.lat, v.long, v.contentType)
+
 		println(v.jb)
 	}
 }
