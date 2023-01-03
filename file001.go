@@ -17,7 +17,7 @@ type object struct {
 }
 
 // dokdb -  struct for store json
-type dokdb struct {
+type db struct {
 	// path to filename with raw json byte inside
 	filename string
 	// string is a random UUID
@@ -29,8 +29,8 @@ type dokdb struct {
 //	NEW
 //
 // new make new db
-func New(fn string) *dokdb {
-	return &dokdb{
+func New(fn string) *db {
+	return &db{
 		filename: fn,
 		store:    make(map[string]object),
 	}
@@ -39,7 +39,7 @@ func New(fn string) *dokdb {
 // ------------------------------------------------------
 //
 //	PRINT store
-func Print() {
+func (d *db) Print() {
 	println("print store")
 }
 
@@ -48,7 +48,7 @@ func Print() {
 //	ADD object
 //
 // Add new object and return UUID
-func (d *dokdb) Add(o object) (id string) {
+func (d *db) Add(o object) (id string) {
 	newuuid := uuid.New()
 	println(newuuid.String())
 	return newuuid.String()
@@ -59,7 +59,7 @@ func (d *dokdb) Add(o object) (id string) {
 //	SAVE
 //
 // Save "store map[string]placestruct to filename
-func (d *dokdb) Save() (er error) {
+func (d *db) Save() (er error) {
 	println("func dokdb save")
 
 	fd, err := os.Create(d.filename)
@@ -91,7 +91,7 @@ func (d *dokdb) Save() (er error) {
 //	LOAD
 //
 // Load - load from "filename" to "store"
-func (d *dokdb) Load(f string) (er error) {
+func (d *db) Load(f string) (er error) {
 	println("func Load json byte from filename")
 	rawbytes, err := ioutil.ReadFile(d.filename)
 	if err != nil {
