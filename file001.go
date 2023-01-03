@@ -38,6 +38,13 @@ func New(fn string) *dokdb {
 
 // ------------------------------------------------------
 //
+//	PRINT store
+func Print() {
+	println("print store")
+}
+
+// ------------------------------------------------------
+//
 //	ADD object
 //
 // Add new object and return UUID
