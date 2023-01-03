@@ -9,9 +9,11 @@ import (
 )
 
 type object struct {
-	lat, long float64 `json:string` //coords
+	// coords latitude, longitude
+	lat, long float64
 	// contetntype is MIME Content-type  text/html image/jpg
 	contentType string
+	description string
 	// raw json byte
 	jb []byte
 }
@@ -28,7 +30,7 @@ type db struct {
 //
 //	NEW
 //
-// new make new db
+// new make new *db
 func New(fn string) *db {
 	return &db{
 		filename: fn,
@@ -45,13 +47,22 @@ func (d *db) Print() {
 
 // ------------------------------------------------------
 //
-//	ADD object
+//	ADD json
 //
-// Add new object and return UUID
-func (d *db) Add(o object) (id string) {
-	newuuid := uuid.New()
-	println(newuuid.String())
-	return newuuid.String()
+// Add new json []byte  and return UUID
+func (d *db) AddJson(lat, long float64, ct, ds string, jr []byte) (id string) {
+	myUuid := uuid.New()
+
+	ov := object{}
+	ov.lat = lat
+	ov.long = long
+	ov.contentType = ct
+	ov.description = ds
+	ov.jb = jr
+
+	d.store[id] = ov
+
+	return myUuid.String()
 }
 
 // ------------------------------------------------------
