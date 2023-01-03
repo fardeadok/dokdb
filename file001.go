@@ -41,9 +41,10 @@ func New(fn string) *dokdb {
 //	ADD object
 //
 // Add new object
-func (d *dokdb) Add(o object) {
+func (d *dokdb) Add(o object) (id string) {
 	newuuid := uuid.New()
 	println(newuuid.String())
+	return newuuid.String()
 }
 
 // ------------------------------------------------------
