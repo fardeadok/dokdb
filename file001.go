@@ -24,7 +24,7 @@ type dokdb struct {
 
 // ------------------------------------------------------
 //
-//	New
+//	NEW
 //
 // new make new db
 func (d *dokdb) New(fn string) *dokdb {
