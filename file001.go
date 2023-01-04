@@ -2,7 +2,6 @@ package dokdb
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 
 	"github.com/google/uuid"
@@ -26,7 +25,7 @@ type db struct {
 	store map[string]object
 }
 
-// ------------------------------------------------------
+// ----------------------
 //
 //	NEW
 //
@@ -38,9 +37,11 @@ func New(fn string) *db {
 	}
 }
 
-// ------------------------------------------------------
+// ----------------------
 //
-//	PRINT all store
+//	PRINT
+//
+//	print all store
 func (d *db) Print() {
 	println("func Print store")
 
@@ -52,7 +53,7 @@ func (d *db) Print() {
 	}
 }
 
-// ------------------------------------------------------
+// ----------------------
 //
 //	ADD json
 //
@@ -75,7 +76,7 @@ func (d *db) AddJson(lat, long float64, ct, ds string, jr []byte) (id string) {
 	return myuuidString
 }
 
-// ------------------------------------------------------
+//	 --------------------
 //
 //	SAVE
 //
@@ -107,21 +108,21 @@ func (d *db) Save() (er error) {
 	return nil
 }
 
-// ------------------------------------------------------
+//	--------------------
 //
 //	LOAD
 //
 // Load - load from "filename" to "store"
-func (d *db) Load(f string) (er error) {
+func (d *db) Load() (er error) {
 	println("func Load json byte from filename")
-	rawbytes, err := ioutil.ReadFile(d.filename)
+
+	rawbytes, err := os.ReadFile(d.filename)
 	if err != nil {
 		return err
 	}
 
-	err002 := json.Unmarshal(rawbytes, &d.store)
-	if err002 != nil {
-		return err002
+	if err := json.Unmarshal(rawbytes, &d.store); err != nil {
+		return err
 	}
 
 	println("func Load ok")
