@@ -9,12 +9,14 @@ import (
 
 type object struct {
 	// coords latitude, longitude
-	lat, long float64
+	// поля с большой буквы иначе не экспортируются и не записываются в файл
+	Lat  float64 `json:"lt"`
+	Long float64 `json:"lg"`
 	// contetntype is MIME Content-type  text/html image/jpg
-	contentType string
-	description string
-	// raw json byte
-	jb []byte
+	ContentType string `json:"ct"`
+	Description string `json:"ds"`
+	// json string
+	Js string `json:"js"`
 }
 
 // dokdb -  struct for store json
@@ -43,12 +45,12 @@ func New(fn string) *db {
 //
 //	print all store
 func (d *db) Print() {
-	println("func Print store")
+	println("func Print store v1549")
 
 	for k, v := range d.store {
 		println("uuid=", k)
-		println(v.lat, v.long, v.contentType)
-		println(v.jb)
+		println("lat long contenttype=", v.Lat, v.Long, v.ContentType)
+		println("json=", v.Js)
 		println()
 	}
 }
@@ -57,19 +59,19 @@ func (d *db) Print() {
 //
 //	ADD json
 //
-// Add new json []byte  and return UUID
-func (d *db) AddJson(lat, long float64, ct, ds string, jr []byte) (id string) {
+// Add new json string  and return UUID
+func (d *db) AddJson(lat, long float64, ct, ds string, js string) (id string) {
 	println("func AddJson")
 	myUuid := uuid.New()
 
 	myuuidString := myUuid.String()
 
 	ov := object{}
-	ov.lat = lat
-	ov.long = long
-	ov.contentType = ct
-	ov.description = ds
-	ov.jb = jr
+	ov.Lat = lat
+	ov.Long = long
+	ov.ContentType = ct
+	ov.Description = ds
+	ov.Js = js
 
 	d.store[myuuidString] = ov
 
@@ -92,10 +94,14 @@ func (d *db) Save() (er error) {
 
 	// записываем красиво с отступами
 	tmpJ, err := json.MarshalIndent(d.store, "", " ")
-	// tmpJ, err := json.Marshal(dstore)
 	if err != nil {
 		return err
 	}
+
+	println("print string(tmpJ)")
+	println(string(tmpJ))
+	println("")
+
 	println("store is converted to tmpJ []byte. len=", len(tmpJ))
 
 	writedLen, err := fd.Write(tmpJ)
