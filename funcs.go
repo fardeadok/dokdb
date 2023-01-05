@@ -1,6 +1,9 @@
 package dokdb
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 //	--------------------
 //
@@ -71,4 +74,15 @@ func checkPointInradius(p1 coords, radius int64, p coords) bool {
 
 	return dist001 <= float64(radius)
 
+}
+
+// PRINT OBJECT
+func printObject(o object) {
+	println()
+	println("uuid=       ", o.Id)
+	println("ContentType=", o.ContentType)
+	fmt.Printf("latitude=        %8.2f \n", o.Lat)
+	fmt.Printf("longitude=       %8.2f \n", o.Long)
+	println("json=       ", o.Js)
+	println()
 }

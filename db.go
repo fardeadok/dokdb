@@ -3,7 +3,6 @@ package dokdb
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -60,9 +59,7 @@ func (d *db) Print() {
 
 	for k, v := range d.store {
 		println("uuid=", k)
-		println("lat long contenttype=", v.Lat, v.Long, v.ContentType)
-		println("json=", v.Js)
-		println()
+		printObject(v)
 	}
 }
 
@@ -268,10 +265,7 @@ func (d *db) FindInRect(point1, point2 coords) (objectList []object) {
 			objectList = append(objectList, v)
 			println()
 			println("uuid=", k)
-			println("contenttype=", v.ContentType)
-			fmt.Printf("lat=   %8.2f \n", v.Lat)
-			fmt.Printf("long=  %8.2f \n", v.Long)
-			println("json=", v.Js)
+			printObject(v)
 		}
 	}
 
@@ -290,12 +284,8 @@ func (d *db) FindInRadius(point coords, radiusMeters int64) (objectList []object
 	for k, v := range d.store {
 		if checkPointInradius(point, radiusMeters, v.coords) {
 			objectList = append(objectList, v)
-			println()
 			println("uuid=       ", k)
-			println("contenttype=", v.ContentType)
-			fmt.Printf("lat=        %8.2f \n", v.Lat)
-			fmt.Printf("long=       %8.2f \n", v.Long)
-			println("json=       ", v.Js)
+			printObject(v)
 		}
 	}
 
