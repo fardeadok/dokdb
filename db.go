@@ -71,7 +71,7 @@ func (d *db) Print() {
 //	ADD json
 //
 // Add new json string  and return UUID
-func (d *db) AddJson(lat, long float64, ct, ds string, js string) (id string) {
+func (d *db) AddNewObjectFields(lat, long float64, ct, ds string, js string) (id string) {
 	println("FUNC ADDJSON")
 	myUuid := uuid.New()
 	myuuidString := myUuid.String()
@@ -84,7 +84,9 @@ func (d *db) AddJson(lat, long float64, ct, ds string, js string) (id string) {
 	ov.ContentType = ct
 	ov.Description = ds
 
-	str001 := strings.ReplaceAll(js, "  ", " ")
+	str000 := strings.ReplaceAll(js, "  ", " ")
+	str001 := strings.ReplaceAll(str000, "\t", " ")
+
 	ov.Js = str001
 
 	d.Lock()
@@ -110,6 +112,24 @@ func (d *db) AddNewObject(o object) (id string, err error) {
 	d.store[idString] = o
 
 	return idString, nil
+}
+
+// ------------------
+//
+//	UPDATE= search object by his id and update
+//
+//
+//	update object by his id field
+func (d *db) UpdateObject(o object) (err error) {
+	println("UPDATE existing object")
+	// id001 := uuid.New()
+	id := o.Id
+
+	d.Lock()
+	defer d.Unlock()
+	d.store[id] = o
+
+	return nil
 }
 
 // ------------------
@@ -142,7 +162,7 @@ func (d *db) FindUUID(id string) (o object, err error) {
 //	UPDATE JSON
 //
 // update existing record by UUID
-func (d *db) UpdateJson(id string, field string, newfalue string) (err error) {
+func (d *db) UpdateField(id string, field string, newfalue string) (err error) {
 	println("UPDATE JSOB by uuid")
 
 	object001, ok := d.store[id]
@@ -244,6 +264,27 @@ func (d *db) FindInRect(point1, point2 coords) (objectList []object) {
 			fmt.Printf("lat=   %8.2f \n", v.Lat)
 			fmt.Printf("long=  %8.2f \n", v.Long)
 			println("json=", v.Js)
+		}
+	}
+
+	return objectList
+}
+
+//	--------------------
+//
+//	FIND IN RADIUS
+//
+// return objects in radius
+func (d *db) FindInradius(point coords, radiusMeters int64) (objectList []object) {
+	for k, v := range d.store {
+		if checkPointInradius(point, radiusMeters, v.coords) {
+			objectList = append(objectList, v)
+			println()
+			println("uuid=       ", k)
+			println("contenttype=", v.ContentType)
+			fmt.Printf("lat=        %8.2f \n", v.Lat)
+			fmt.Printf("long=       %8.2f \n", v.Long)
+			println("json=       ", v.Js)
 		}
 	}
 
