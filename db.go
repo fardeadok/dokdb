@@ -274,7 +274,7 @@ func (d *db) FindInRect(point1, point2 coords) (objectList []object) {
 //
 //	FIND IN RADIUS
 //
-// return objects in radius
+// return objects in radius (meters)
 func (d *db) FindInradius(point coords, radiusMeters int64) (objectList []object) {
 	for k, v := range d.store {
 		if checkPointInradius(point, radiusMeters, v.coords) {
