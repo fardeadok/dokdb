@@ -3,6 +3,7 @@ package dokdb
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -83,7 +84,7 @@ func (d *db) AddJson(lat, long float64, ct, ds string, js string) (id string) {
 	ov.ContentType = ct
 	ov.Description = ds
 
-	str001 := strings.ReplaceAll(js, "\\", "")
+	str001 := strings.ReplaceAll(js, "  ", " ")
 	ov.Js = str001
 
 	d.Lock()
@@ -95,6 +96,49 @@ func (d *db) AddJson(lat, long float64, ct, ds string, js string) (id string) {
 
 // ------------------
 //
+//	ADD OBJECT without uuid inside
+//	id will be added by db
+//
+//	add new object and return his uuid
+func (d *db) AddNewObject(o object) (id string, err error) {
+	println("FIND new object")
+	id001 := uuid.New()
+	idString := id001.String()
+
+	d.Lock()
+	defer d.Unlock()
+	d.store[idString] = o
+
+	return idString, nil
+}
+
+// ------------------
+//
+//	FIND OBJECT BY UUID
+//
+//	return object
+func (d *db) FindUUID(id string) (o object, err error) {
+	println("FIND by uuid")
+
+	object001, ok := d.store[id]
+	if !ok || id == "" {
+		return object{
+			coords: coords{
+				Lat:  0,
+				Long: 0,
+			},
+			Id:          id,
+			ContentType: "",
+			Description: "",
+			Js:          "",
+		}, errors.New("no id in db")
+	}
+
+	return object001, nil
+}
+
+// ------------------
+//
 //	UPDATE JSON
 //
 // update existing record by UUID
@@ -102,7 +146,7 @@ func (d *db) UpdateJson(id string, field string, newfalue string) (err error) {
 	println("UPDATE JSOB by uuid")
 
 	object001, ok := d.store[id]
-	if ok != true {
+	if !ok {
 		return errors.New("no id in db")
 	}
 
@@ -185,7 +229,7 @@ func (d *db) Load() (er error) {
 
 //	 --------------------
 //
-//	find in rect
+//	FIND IN RECT
 //
 // find all objects in border and return slice
 func (d *db) FindInRect(point1, point2 coords) (objectList []object) {
@@ -196,7 +240,9 @@ func (d *db) FindInRect(point1, point2 coords) (objectList []object) {
 			objectList = append(objectList, v)
 			println()
 			println("uuid=", k)
-			println("lat long contenttype=", v.Lat, v.Long, v.ContentType)
+			println("contenttype=", v.ContentType)
+			fmt.Printf("lat=   %8.2f \n", v.Lat)
+			fmt.Printf("long=  %8.2f \n", v.Long)
 			println("json=", v.Js)
 		}
 	}
