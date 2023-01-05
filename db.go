@@ -72,7 +72,9 @@ func (d *db) Print() {
 //
 // Add new json string  and return UUID
 func (d *db) AddNewObjectFields(lat, long float64, ct, ds string, js string) (id string) {
+	println("")
 	println("FUNC ADDJSON")
+
 	myUuid := uuid.New()
 	myuuidString := myUuid.String()
 	println(myuuidString)
@@ -103,6 +105,7 @@ func (d *db) AddNewObjectFields(lat, long float64, ct, ds string, js string) (id
 //
 //	add new object and return his uuid
 func (d *db) AddNewObject(o object) (id string, err error) {
+	println("")
 	println("FIND new object")
 	id001 := uuid.New()
 	idString := id001.String()
@@ -121,6 +124,7 @@ func (d *db) AddNewObject(o object) (id string, err error) {
 //
 //	update object by his id field
 func (d *db) UpdateObject(o object) (err error) {
+	println("")
 	println("UPDATE existing object")
 	// id001 := uuid.New()
 	id := o.Id
@@ -138,6 +142,7 @@ func (d *db) UpdateObject(o object) (err error) {
 //
 //	return object
 func (d *db) FindUUID(id string) (o object, err error) {
+	println("")
 	println("FIND by uuid")
 
 	object001, ok := d.store[id]
@@ -191,6 +196,7 @@ func (d *db) UpdateField(id string, field string, newfalue string) (err error) {
 //
 // Save "store map[string]placestruct to filename
 func (d *db) Save() (er error) {
+	println("")
 	println("FUNC SAVE")
 
 	fd, err := os.Create(d.filename)
@@ -230,6 +236,7 @@ func (d *db) Save() (er error) {
 //
 // Load - load from "filename" to "store"
 func (d *db) Load() (er error) {
+	println("")
 	println("FUNC LOAD json byte from filename=", d.filename)
 
 	rawbytes, err := os.ReadFile(d.filename)
@@ -253,6 +260,7 @@ func (d *db) Load() (er error) {
 //
 // find all objects in border and return slice
 func (d *db) FindInRect(point1, point2 coords) (objectList []object) {
+	println("")
 	println("FUNC FindInRect")
 
 	for k, v := range d.store {
@@ -275,7 +283,10 @@ func (d *db) FindInRect(point1, point2 coords) (objectList []object) {
 //	FIND IN RADIUS
 //
 // return objects in radius (meters)
-func (d *db) FindInradius(point coords, radiusMeters int64) (objectList []object) {
+func (d *db) FindInRadius(point coords, radiusMeters int64) (objectList []object) {
+	println("")
+	println("FUNC FindInRect")
+
 	for k, v := range d.store {
 		if checkPointInradius(point, radiusMeters, v.coords) {
 			objectList = append(objectList, v)
@@ -295,6 +306,7 @@ func (d *db) FindInradius(point coords, radiusMeters int64) (objectList []object
 //
 // get all objects and return channel
 func (d *db) GetAll_chan(in chan<- object) <-chan object {
+	println("")
 	out := make(chan object)
 	return out
 }
@@ -305,6 +317,7 @@ func (d *db) GetAll_chan(in chan<- object) <-chan object {
 //
 // find all objects in border and return chan
 func (d *db) FindInRect_chan(point1, point2 coords, in chan<- object) <-chan object {
+	println("")
 	out := make(chan object)
 	return out
 }
