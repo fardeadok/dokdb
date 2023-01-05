@@ -19,7 +19,7 @@ func checkBetweenX(minX, maxX, x float64) bool {
 	return false
 }
 
-func makePoint(x, y float64) coords {
+func MakePoint(x, y float64) coords {
 	return coords{Lat: x, Long: y}
 }
 
