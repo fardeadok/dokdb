@@ -3,6 +3,7 @@ package dokdb
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -17,17 +18,17 @@ type object struct {
 	// поля с большой буквы иначе не экспортируются и не записываются в файл
 	// Lat  float64 `json:"lt"`
 	// Long float64 `json:"lg"`
-	coords
+	coords `json:"coords"`
 	// UUID  unique long id
-	Id string `json:"id"`
+	Id string `json:"id" json:"id,omitempty"`
 	// contetntype is MIME Content-type  text/html image/jpg
-	ContentType string `json:"ct"`
-	Description string `json:"ds"`
+	ContentType string `json:"ct" json:"content_type,omitempty"`
+	Description string `json:"ds" json:"description,omitempty"`
 	// json string
-	Js string `json:"js"`
+	Js string `json:"js" json:"js,omitempty"`
 }
 
-// dokdb -  struct for store json
+// db -  struct for store json
 type db struct {
 	// path to filename with raw json byte inside
 	filename string
@@ -36,11 +37,7 @@ type db struct {
 	store map[string]object
 }
 
-// ----------------------
-//
-//	NEW
-//
-// new make new *db
+// New make new *db
 func New(fn string) *db {
 	println("FUNC NEW 18:02")
 	return &db{
@@ -63,11 +60,7 @@ func (d *db) Print() {
 	}
 }
 
-// ----------------------
-//
-//	ADD json
-//
-// Add new json string  and return UUID
+// AddNewObjectFields - add new json string  and return UUID
 func (d *db) AddNewObjectFields(lat, long float64, ct, ds string, js string) (id string) {
 	println("")
 	println("FUNC ADDJSON")
@@ -200,7 +193,12 @@ func (d *db) Save() (er error) {
 	if err != nil {
 		return err
 	}
-	defer fd.Close()
+	defer func(fd *os.File) {
+		err := fd.Close()
+		if err != nil {
+			prinln("error close file")
+		}
+	}(fd)
 
 	d.Lock()
 	defer d.Unlock()
@@ -279,7 +277,9 @@ func (d *db) FindInRect(point1, point2 coords) (objectList []object) {
 // return objects in radius (meters)
 func (d *db) FindInRadius(point coords, radiusMeters int64) (objectList []object) {
 	println("")
-	println("FUNC FindInRect")
+	println("FUNC FindInRadius")
+	fmt.Printf("center lat= %8.2f    long=  %8.2f   \n", point.Lat, point.Long)
+	println("radius=", radiusMeters)
 
 	for k, v := range d.store {
 		if checkPointInradius(point, radiusMeters, v.coords) {

@@ -54,13 +54,20 @@ func checkPointInRect(p1, p2 coords, p coords) bool {
 // distance between 2 points.
 // distance is float64 represents the raw
 // number of meters
-func distanceBetween(p1, p2 coords) float64 {
+func DistanceBetween(p1, p2 coords) float64 {
+	println("	func distancebetween")
 
-	value := 0.5 - math.Cos((p2.Lat-p1.Lat)*PiOver180)/2
-	value += math.Cos(p1.Lat*PiOver180) * math.Cos(p2.Lat*PiOver180) * (1 - math.Cos((p2.Long-p1.Long)*PiOver180)) / 2
+	value := 0.5 - math.Cos((p2.Lat-p1.Lat)*PiOver180)/2 + math.Cos(p1.Lat*PiOver180)*math.Cos(p2.Lat*PiOver180)*(1-math.Cos((p2.Long-p1.Long)*PiOver180))/2
 
-	return float64(DoubleEarthRadius * Distance(math.Asin(math.Sqrt(value))))
+	fmt.Printf("value=  %10.6f  \n", value)
 
+	d := float64(DoubleEarthRadius * Distance(math.Asin(math.Sqrt(value))))
+
+	fmt.Printf("distance meters=  %8.2f \n", d)
+
+	fmt.Printf("distance km=  %8.2f \n", d/1000)
+
+	return d / 1000
 }
 
 // ------------------
@@ -68,21 +75,24 @@ func distanceBetween(p1, p2 coords) float64 {
 // check if point in radius
 // radius is METERS!
 func checkPointInradius(p1 coords, radius int64, p coords) bool {
+	println("")
+	println("func checkpointinradius")
+	fmt.Printf("center lat= %8.2f    long=  %8.2f   \n", p1.Lat, p1.Long)
+	fmt.Printf("point  lat= %8.2f    long=  %8.2f   \n", p.Lat, p.Long)
 
 	// meters
-	dist001 := distanceBetween(p1, p)
-
+	dist001 := DistanceBetween(p1, p)
 	return dist001 <= float64(radius)
-
 }
 
 // PRINT OBJECT
 func printObject(o object) {
-	println()
+	println("")
+	println("func printobject")
 	println("uuid=       ", o.Id)
 	println("ContentType=", o.ContentType)
-	fmt.Printf("latitude=        %8.2f \n", o.Lat)
-	fmt.Printf("longitude=       %8.2f \n", o.Long)
-	println("json=       ", o.Js)
+	fmt.Printf("latitude= %8.2f \n", o.Lat)
+	fmt.Printf("longitude=%8.2f \n", o.Long)
+	println("json=", o.Js)
 	println()
 }
