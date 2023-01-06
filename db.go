@@ -12,22 +12,6 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-// OBJECT IS RECORD IN DB
-type object struct {
-	// coords latitude, longitude
-	// поля с большой буквы иначе не экспортируются и не записываются в файл
-	// Lat  float64 `json:"lt"`
-	// Long float64 `json:"lg"`
-	coords `json:"coords"`
-	// UUID  unique long id
-	Id string `json:"id" json:"id,omitempty"`
-	// contetntype is MIME Content-type  text/html image/jpg
-	ContentType string `json:"ct" json:"content_type,omitempty"`
-	Description string `json:"ds" json:"description,omitempty"`
-	// json string
-	Js string `json:"js" json:"js,omitempty"`
-}
-
 // db -  struct for store json
 type db struct {
 	// path to filename with raw json byte inside
@@ -37,6 +21,10 @@ type db struct {
 	store map[string]object
 }
 
+// ----------------------
+//
+//	NEW
+//
 // New make new *db
 func New(fn string) *db {
 	println("FUNC NEW 18:02")
@@ -50,7 +38,7 @@ func New(fn string) *db {
 //
 //	PRINT
 //
-//	print all store
+//	Print all store
 func (d *db) Print() {
 	println("FUNC PRINT")
 
@@ -60,6 +48,10 @@ func (d *db) Print() {
 	}
 }
 
+// ----------------------
+//
+//	AddNewObjectFields
+//
 // AddNewObjectFields - add new json string  and return UUID
 func (d *db) AddNewObjectFields(lat, long float64, ct, ds string, js string) (id string) {
 	println("")
@@ -93,10 +85,10 @@ func (d *db) AddNewObjectFields(lat, long float64, ct, ds string, js string) (id
 //	ADD OBJECT without uuid inside
 //	id will be added by db
 //
-//	add new object and return his uuid
+//	add new object and return his new generated uuid
 func (d *db) AddNewObject(o object) (id string, err error) {
 	println("")
-	println("FIND new object")
+	println("func AddNewObjectFields")
 	id001 := uuid.New()
 	idString := id001.String()
 
@@ -196,7 +188,7 @@ func (d *db) Save() (er error) {
 	defer func(fd *os.File) {
 		err := fd.Close()
 		if err != nil {
-			prinln("error close file")
+			println("error close file")
 		}
 	}(fd)
 

@@ -28,13 +28,6 @@ func checkBetweenX(minX, maxX, x float64) bool {
 
 //	--------------------
 //
-// make new point from lat, long
-func MakePoint(x, y float64) coords {
-	return coords{Lat: x, Long: y}
-}
-
-//	--------------------
-//
 // check point in rect
 func checkPointInRect(p1, p2 coords, p coords) bool {
 	minx, maxx := sortX(p1.Lat, p2.Lat)
@@ -61,7 +54,7 @@ func DistanceBetween(p1, p2 coords) float64 {
 
 	fmt.Printf("value=  %10.6f  \n", value)
 
-	d := float64(DoubleEarthRadius * Distance(math.Asin(math.Sqrt(value))))
+	d := float64(DoubleEarthRadius * distance(math.Asin(math.Sqrt(value))))
 
 	fmt.Printf("distance meters=  %8.2f \n", d)
 
