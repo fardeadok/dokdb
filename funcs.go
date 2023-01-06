@@ -77,15 +77,3 @@ func checkPointInradius(p1 coords, radius int64, p coords) bool {
 	dist001 := DistanceBetween(p1, p)
 	return dist001 <= float64(radius)
 }
-
-// PRINT OBJECT
-func printObject(o object) {
-	println("")
-	println("func printobject")
-	println("uuid=       ", o.Id)
-	println("ContentType=", o.ContentType)
-	fmt.Printf("latitude= %8.2f \n", o.Lat)
-	fmt.Printf("longitude=%8.2f \n", o.Long)
-	println("json=", o.Js)
-	println()
-}

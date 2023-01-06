@@ -15,9 +15,15 @@ type coords struct {
 
 type Point coords
 
+// String return formatted lat,long
 func (c *coords) String() string {
 	str001 := fmt.Sprintf(" %8.2f , ", c.Lat) + fmt.Sprintf(" %8.2f", c.Long)
 	return str001
+}
+
+// Print coords.Stirng()
+func (c *coords) Print() {
+	println(c.String())
 }
 
 //	--------------------
