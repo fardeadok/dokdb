@@ -23,6 +23,10 @@ dist/
 *.sh
 *.yaml
 
+.sync
+./sync
+./idea
+
 dist/
 
 dist/

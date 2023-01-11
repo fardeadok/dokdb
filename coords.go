@@ -49,7 +49,7 @@ func NewCoords(x, y float64) coords {
 
 //	--------------------
 //
-// check point in rect
+// check point in rect. return true or false
 func (c *coords) InRect(p1, p2 coords) bool {
 	if c.BetweenLat(p1, p2) && c.BetweenLong(p1, p2) {
 		return true
@@ -81,9 +81,8 @@ func (c *coords) BetweenLong(a, b coords) bool {
 
 // ------------------
 //
-// distance to another Point
-// distance is float64 represents the raw
-// number of meters
+// distance to another Point.
+// distance is float64 represents the raw  number of meters
 func (c *coords) Distance(p2 coords) float64 {
 	// println("	func distance")
 	value := 0.5 - math.Cos((p2.Lat-c.Lat)*PiOver180)/2 + math.Cos(c.Lat*PiOver180)*math.Cos(p2.Lat*PiOver180)*(1-math.Cos((p2.Long-c.Long)*PiOver180))/2

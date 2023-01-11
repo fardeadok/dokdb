@@ -46,20 +46,15 @@ func checkPointInRect(p1, p2 coords, p coords) bool {
 //
 // distance between 2 points.
 // distance is float64 represents the raw
-// number of meters
+// number of Kilometers
 func DistanceBetween(p1, p2 coords) float64 {
-	println("	func distancebetween")
-
+	// println("	func distancebetween")
 	value := 0.5 - math.Cos((p2.Lat-p1.Lat)*PiOver180)/2 + math.Cos(p1.Lat*PiOver180)*math.Cos(p2.Lat*PiOver180)*(1-math.Cos((p2.Long-p1.Long)*PiOver180))/2
-
-	fmt.Printf("value=  %10.6f  \n", value)
-
+	// fmt.Printf("value=  %10.6f  \n", value)
 	d := float64(DoubleEarthRadius * distance(math.Asin(math.Sqrt(value))))
 
 	fmt.Printf("distance meters=  %8.2f \n", d)
-
 	fmt.Printf("distance km=  %8.2f \n", d/1000)
-
 	return d / 1000
 }
 
