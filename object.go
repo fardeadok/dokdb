@@ -22,7 +22,59 @@ type object struct {
 	ContentType string `json:"ct"`
 	Description string `json:"ds"`
 	// json string
-	Js string `json:"js"`
+	// Js string `json:"js"`
+	Js []byte `json:"js"`
+}
+
+// NewObject return new object with RANDOM uuid ID
+func NewObject() *object {
+	return &object{
+		coords:      coords{Lat: 0, Long: 0},
+		Id:          uuid.New().String(),
+		ContentType: "",
+		Description: "",
+		Js:          []byte{},
+	}
+}
+
+func (o *object) Contain(field, substr string) bool {
+
+	v := o.GetField(field)
+
+	return strings.Contains(v, substr)
+}
+
+// get coords
+func (o *object) GetCoords() coords {
+	return o.coords
+}
+
+// set coords
+func (o *object) SetCoords(point coords) *object {
+	o.coords = point
+	return o
+}
+
+// return string Id
+func (o *object) GetId() string {
+	return o.Id
+}
+
+// set string Id
+func (o *object) SetId(i string) *object {
+	o.Id = i
+	return o
+}
+
+// get ContentType
+func (o *object) GetContentType() string {
+	return o.ContentType
+}
+
+// set ContentType string
+func (o *object) SetContentType(ct string) *object {
+	o.ContentType = ct
+	return o
 }
 
 // check if object field==value return true
@@ -31,38 +83,33 @@ func (o *object) Equals(jspath, value string) bool {
 	return value == fieldValue
 }
 
-// NewObject return new object with RANDOM uuid ID
-func NewObject() object {
-	return object{
-		coords: coords{
-			Lat:  0,
-			Long: 0,
-		},
-		Id:          uuid.New().String(),
-		ContentType: "",
-		Description: "",
-		Js:          "",
-	}
-}
-
 // set value for object.Js
 func (o *object) SetField(jspath string, newvalue string) error {
+	// вместо  string лучше потом поставить interface{} ^^
+	// чтобы сохранять любые поля
 	println("func object.setfield")
 	js := o.Js
-	newjs, err := sjson.Set(js, jspath, newvalue)
+
+	// tmp, err := sjson.SetBytes()
+
+	newjs, err := sjson.SetBytes(js, jspath, newvalue)
 	if err != nil {
 		return err
 	}
+
 	o.Js = newjs
 	return nil
 }
 
 // return string from object.js field
 func (o *object) GetField(jspath string) string {
-	gjs := gjson.Get(o.Js, jspath)
+	// можно возвращать просто gjs вместо строки  ^^^^
+	gjs := gjson.GetBytes(o.Js, jspath)
+
 	if gjs.Exists() {
 		return gjs.String()
 	}
+
 	return ""
 }
 
@@ -82,7 +129,7 @@ func (o *object) Distance(o1 object) float64 {
 }
 
 // fill object fields
-func NewObjectFill(lat, long float64, ct, ds string, js string) object {
+func NewObjectFill(lat, long float64, ct, ds string, js string) *object {
 	u001 := uuid.New().String()
 	ov := NewObject()
 	ov.Id = u001
@@ -92,30 +139,34 @@ func NewObjectFill(lat, long float64, ct, ds string, js string) object {
 
 	ov.ContentType = ct
 	ov.Description = ds
-	str000 := strings.ReplaceAll(js, "  ", " ")
-	str001 := strings.ReplaceAll(str000, "\t", " ")
-	ov.Js = str001
+	// str000 := strings.ReplaceAll(js, "  ", " ")
+	// str001 := strings.ReplaceAll(str000, "\t", " ")
+	ov.Js = []byte(js)
 
 	return ov
 }
 
-// Print
-func (o *object) Print() {
+// Print object id, contenttype, lat, long, json
+func (o *object) Print() *object {
 	println("id=       ", o.Id)
 	println("ContentType=", o.ContentType)
 	fmt.Printf("latitude= %8.2f \n", o.Lat)
 	fmt.Printf("longitude=%8.2f \n", o.Long)
-	println("json=", o.Js)
+	println("json=", string(o.Js))
+
+	return o
 }
 
 // PRINT OBJECT
-func printObject(o object) {
+func printObject(o object) *object {
 	println("")
 	println("func printobject")
 	println("uuid=       ", o.Id)
 	println("ContentType=", o.ContentType)
 	fmt.Printf("latitude= %8.2f \n", o.Lat)
 	fmt.Printf("longitude=%8.2f \n", o.Long)
-	println("json=", o.Js)
+	println("json=", string(o.Js))
 	println()
+
+	return &o
 }

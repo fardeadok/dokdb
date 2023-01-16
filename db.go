@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
@@ -94,10 +93,10 @@ func (d *db) AddNewObjectFields(lat, long float64, ct, ds string, js string) (id
 	ov.ContentType = ct
 	ov.Description = ds
 
-	str000 := strings.ReplaceAll(js, "  ", " ")
-	str001 := strings.ReplaceAll(str000, "\t", " ")
+	// str000 := strings.ReplaceAll(js, "  ", " ")
+	// str001 := strings.ReplaceAll(str000, "\t", " ")
 
-	ov.Js = str001
+	ov.Js = []byte(js)
 
 	d.Lock()
 	defer d.Unlock()
@@ -161,7 +160,7 @@ func (d *db) FindUUID(id string) (o object, err error) {
 			Id:          id,
 			ContentType: "",
 			Description: "",
-			Js:          "",
+			Js:          []byte{},
 		}, errors.New("no id in db")
 	}
 

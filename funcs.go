@@ -1,7 +1,6 @@
 package dokdb
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -53,8 +52,8 @@ func DistanceBetween(p1, p2 coords) float64 {
 	// fmt.Printf("value=  %10.6f  \n", value)
 	d := float64(DoubleEarthRadius * distance(math.Asin(math.Sqrt(value))))
 
-	fmt.Printf("distance meters=  %8.2f \n", d)
-	fmt.Printf("distance km=  %8.2f \n", d/1000)
+	// fmt.Printf("distance meters=  %8.2f \n", d)
+	// fmt.Printf("distance km=  %8.2f \n", d/1000)
 	return d / 1000
 }
 
@@ -63,10 +62,10 @@ func DistanceBetween(p1, p2 coords) float64 {
 // check if point in radius
 // radius is METERS!
 func checkPointInradius(p1 coords, radius int64, p coords) bool {
-	println("")
-	println("func checkpointinradius")
-	fmt.Printf("center lat= %8.2f    long=  %8.2f   \n", p1.Lat, p1.Long)
-	fmt.Printf("point  lat= %8.2f    long=  %8.2f   \n", p.Lat, p.Long)
+	// println("")
+	// println("func checkpointinradius")
+	// fmt.Printf("center lat= %8.2f    long=  %8.2f   \n", p1.Lat, p1.Long)
+	// fmt.Printf("point  lat= %8.2f    long=  %8.2f   \n", p.Lat, p.Long)
 
 	// meters
 	dist001 := DistanceBetween(p1, p)
