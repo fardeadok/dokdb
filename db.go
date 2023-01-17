@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -52,7 +53,7 @@ func (d *db) FindByField(jspath, value string) []object {
 // New make new *db.
 // Then us Load for load file in db
 func NewDB(fn string) *db {
-	println("FUNC NEW 18:02")
+	println("func newdb")
 	return &db{
 		filename: fn,
 		store:    make(map[string]object),
@@ -93,10 +94,11 @@ func (d *db) AddNewObjectFields(lat, long float64, ct, ds string, js string) (id
 	ov.ContentType = ct
 	ov.Description = ds
 
-	// str000 := strings.ReplaceAll(js, "  ", " ")
-	// str001 := strings.ReplaceAll(str000, "\t", " ")
+	str000 := strings.ReplaceAll(js, "  ", "")
+	str001 := strings.ReplaceAll(str000, "\n", "")
+	str002 := strings.ReplaceAll(str001, "\t", "")
 
-	ov.Js = []byte(js)
+	ov.Js = str002
 
 	d.Lock()
 	defer d.Unlock()
@@ -160,7 +162,7 @@ func (d *db) FindUUID(id string) (o object, err error) {
 			Id:          id,
 			ContentType: "",
 			Description: "",
-			Js:          []byte{},
+			Js:          "",
 		}, errors.New("no id in db")
 	}
 
@@ -185,7 +187,7 @@ func (d *db) GetField(id string, jspath string) (string, error) {
 //
 // update existing record by UUID
 func (d *db) UpdateField(id string, field string, newfalue string) (err error) {
-	println("UPDATE JSOB by uuid")
+	println("func db.updatefield")
 
 	object001, ok := d.store[id]
 	if !ok {
@@ -228,7 +230,7 @@ func (d *db) Save() (er error) {
 	// }(fd)
 
 	// записываем красиво с отступами
-	tmpJ, err := json.MarshalIndent(d.store, "", "\t")
+	tmpJ, err := json.MarshalIndent(d.store, "", "  ")
 	if err != nil {
 		return err
 	}

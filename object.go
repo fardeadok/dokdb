@@ -22,8 +22,9 @@ type object struct {
 	ContentType string `json:"ct"`
 	Description string `json:"ds"`
 	// json string
-	// Js string `json:"js"`
-	Js []byte `json:"js"`
+	Js string `json:"js"`
+	// Js []byte `json:"js"`  // не пойдет тк при записи в файл теряется текстовый вид
+
 }
 
 // NewObject return new object with RANDOM uuid ID
@@ -33,14 +34,12 @@ func NewObject() *object {
 		Id:          uuid.New().String(),
 		ContentType: "",
 		Description: "",
-		Js:          []byte{},
+		Js:          "",
 	}
 }
 
 func (o *object) Contain(field, substr string) bool {
-
 	v := o.GetField(field)
-
 	return strings.Contains(v, substr)
 }
 
@@ -92,7 +91,7 @@ func (o *object) SetField(jspath string, newvalue string) error {
 
 	// tmp, err := sjson.SetBytes()
 
-	newjs, err := sjson.SetBytes(js, jspath, newvalue)
+	newjs, err := sjson.Set(js, jspath, newvalue)
 	if err != nil {
 		return err
 	}
@@ -103,8 +102,9 @@ func (o *object) SetField(jspath string, newvalue string) error {
 
 // return string from object.js field
 func (o *object) GetField(jspath string) string {
+	// println("		func object.getfield=", jspath)
 	// можно возвращать просто gjs вместо строки  ^^^^
-	gjs := gjson.GetBytes(o.Js, jspath)
+	gjs := gjson.Get(o.Js, jspath)
 
 	if gjs.Exists() {
 		return gjs.String()
@@ -141,7 +141,7 @@ func NewObjectFill(lat, long float64, ct, ds string, js string) *object {
 	ov.Description = ds
 	// str000 := strings.ReplaceAll(js, "  ", " ")
 	// str001 := strings.ReplaceAll(str000, "\t", " ")
-	ov.Js = []byte(js)
+	ov.Js = js
 
 	return ov
 }
