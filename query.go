@@ -28,118 +28,19 @@ import (
 // query DO NOT MODUFY db with Sort,List,Contain etc...
 // use UpdateDB for upliad results from query to db
 type query struct {
-	d      *db               //link to db
+	d *db //link to db
+	// УБРАТЬ КАРТУ И РАБОТАТЬ НАПРЯМУЮ С d.store
 	result map[string]object //internal map of objects
 	in     chan<- object
 	out    <-chan object
 	sync.Mutex
-	list []object //слайс тоже переупорядочивается после каждого запроса!
-	// pos  Next()  Offset() - change pos
-	pos   int // pos=0 after updatelist()
-	limit int // limit for List
-}
-
-//  РАБОТАТЬ С КАРТОЙ А НЕ []object
-// ^^^ не получится тогда выдавать через Sort отсортированную карту- она не сортируется
-// или можно сортировать? - ответЖ нет нельзя. карта преднамеренно рандомизируется при работе поэтому
-// даже отсротированная карта будет смешана
-
-// add field  pos int64  - current position
-
-// только методы    .len()  .limit() .offset() работают с позицией по list[]object
-// и меняют ее
-
-// func Next() or Next(10)  {
-// 	offset(pos)
-// 	getfrom(pos)
-// 	pos++
-// }
-
-// add  .Delete() - вызывать в конце для удаления элементов?
-
-func (q *query) Limit(i int) *query {
-	q.limit = i
-	return q
-}
-
-// func (q *query) GetLimit(i int) int {
-// 	return q.limit
-// }
-
-// limit - RETURN limit []object from list[]object
-//
-// from  [pos]    _do not modify pos_
-//
-// example:  query.Where().List() then query.Limit(10)
-func (q *query) GetList(i int) ([]object, error) {
-
-	// 0  1  2  3  4  5  6  7  8  9  len=10
-	// [] [] [] [] [] [] [] [] [] []
-	// pos=4       ^^
-	// limit=3     4  5  6
-
-	if q.pos < 0 || q.pos >= q.Len() {
-		return nil, errors.New("out of range")
-	}
-
-	ol := make([]object, 0)
-
-	for index := q.pos; index < q.Len(); index++ {
-		o := q.list[index]
-		ol = append(ol, o)
-	}
-
-	return ol, nil
-
-}
-
-// change pos+=offset
-func (q *query) Offset(i int) *query {
-	q.pos += i
-
-	return q
-}
-
-// return list[pos] object and pos++
-func (q *query) Next() (object, error) {
-	// [] [] [] []
-	// 0  1  2  3
-	// len = 4 and max pos is 3
-	if q.pos < 0 || q.pos >= q.Len() {
-		return object{}, errors.New("out of range")
-	}
-
-	o := q.list[q.pos]
-	q.pos++
-	return o, nil
-}
-
-// get object[pos]
-func (q *query) GetObject(i int) object {
-	return q.list[q.pos]
-}
-
-// pos++
-func (q *query) PosIncrease() *query {
-	q.pos++
-	return q
-}
-
-// pos--
-func (q *query) PosDecrease() *query {
-	q.pos--
-	return q
-}
-
-// get position in list[]
-func (q *query) GetPos() int {
-	return q.pos
-}
-
-// set pos in list[]
-func (q *query) SetPos(i int) *query {
-	q.pos = i
-	return q
+	list []object
+	// только Next() меняет позицию.
+	// pos=0 after updatelist() Sort()
+	pos int
+	// переменные для Offset().Limit().GetList()
+	limit  int // limit for List
+	offset int // offset for GetList
 }
 
 // return new  *query
@@ -153,144 +54,73 @@ func NewQuery(dP *db) *query {
 		list:   []object{},
 		pos:    0,
 		limit:  0,
+		offset: 0,
 	}
 
 	return q
 }
 
-// filter - use jsonQ library as filter
-// func (q *query) Filter(jq string) *query {
-// 	q.Lock()
-// 	defer q.Unlock()
-
-// 	for k, v := range q.result {
-
-// 		// jqfilter(........)
-
-// 	}
-
-// 	q.updatelist()
-// 	return q
-// }
-
-//  func (q *query) ContentType(ct string) *query{
-
-// 	return only ct types
-//  }
-
 //
 //
 //
 //
 //
 
-// Id find one object with unique id (uuid)
-// and delete all another
-func (q *query) Id(id string) *query {
-	q.Lock()
-	defer q.Unlock()
+// upload list to d.store
+func (q *query) UpdateToDB() *query {
 
-	for k, v := range q.result {
-		if v.Id != id {
-			delete(q.result, k)
-		}
-	}
-
-	// q.UpdateList()
 	return q
 }
 
-// return object[id] from result map
-func (q *query) GetId(id string) (object, error) {
+//
+//
+//
+//
+//
+
+func (q *query) Filter(f string) *query {
+	// filter - use jsonQ library as filter
+	// func (q *query) Filter(jq string) *query {
+	// 	q.Lock()
+	// 	defer q.Unlock()
+	return q
+}
+
+//
+//
+//
+//
+//
+
+// set list=nil, pos,limit,offset=0
+func (q *query) Reset() *query {
 	q.Lock()
 	defer q.Unlock()
 
-	if o, ok := q.result[id]; ok {
-		return o, nil
-	}
-
-	return object{}, errors.New("no id")
-
-}
-
-// internal func for update list from map \n
-// q.list[]=nil
-// порядок элементов в [] меняется изза карты
-func (q *query) UpdateList() *query {
-	println("updateList")
-	q.pos = 0
-	// clear list[]
 	q.list = nil
-
-	for _, v := range q.result {
-		q.list = append(q.list, v)
-	}
-	println("end updateList")
-
+	q.pos, q.limit, q.offset = 0, 0, 0
 	return q
 }
 
-// sort list[] by distance to point from min to max distance
-func (q *query) Sort(p coords) *query {
-	q.Lock()
-	defer q.Unlock()
-
-	q.UpdateList()
-
-	sort.Slice(q.list,
-		func(i int, j int) bool {
-			p1 := q.list[i].coords
-			p2 := q.list[j].coords
-			d1 := DistanceBetween(p1, p)
-			d2 := DistanceBetween(p2, p)
-			return d1 < d2
-		})
-
-	return q
-}
-
-// Len return int number of objects in list[]ibject
-func (q *query) Len() int {
-	return len(q.list)
-}
-
-//	Return copy  []object
 //
-// GetList - use it after UpdateList() or Sort()
-func (q *query) GetListAll() (ol []object) {
-	// q.UpdateList()  // сбросит если перед ним было Sort() !!!
-	return q.list
-}
+//
+//
+//
+//
 
-// return objects that in radius  point1, radius=r  meters
-// and delete all another
-func (q *query) InRadius(p1 coords, radius int64) *query {
-	q.Lock()
-	defer q.Unlock()
-	for k, v := range q.result {
-		if !v.InRadius(p1, radius) {
-			delete(q.result, k)
-		}
-	}
-
+func (q *query) Start() *query {
+	q.GetAll()
 	return q
 }
 
-// return objects that in rect point1, point2
-// and delete all another
-func (q *query) InRect(p1, p2 coords) *query {
-	q.Lock()
-	defer q.Unlock()
-	for k, v := range q.result {
-		if !v.InRect(p1, p2) {
-			delete(q.result, k)
-		}
-	}
-
-	return q
-}
+//
+//
+//
+//
+//
 
 // fill result map with ALL data from db store
+// УБРАТЬ ФУНКЦИЮ И РАБОТАТЬ НАПРЯМУЮ С d.store через ссылку
 func (q *query) GetAll() *query {
 	println(" func getall")
 	q.Lock()
@@ -312,28 +142,328 @@ func (q *query) GetAll() *query {
 	return q
 }
 
-func (q *query) Start() *query {
-	q.GetAll()
+//
+//
+//
+//
+//
+
+func (q *query) ListLimit(i int) *query {
+	q.limit = i
 	return q
 }
 
-// get all where Field string contain substring.
-// and remove all another objects from result map
-func (q *query) Contain(jspath, substring string) *query {
+//
+//
+//
+//
+//
+
+// return []objects with (offset,limit)
+func (q *query) ListGetN(offset, limit int) ([]object, error) {
+	q.offset = offset
+	q.limit = limit
+	return q.ListGet()
+}
+
+//
+//
+//
+//
+//
+
+// возвращает результаты из списка с отступом offset в количестве limit
+// и не меняет значение pos, offset, limit
+func (q *query) ListGet() ([]object, error) {
+
+	// 0  1  2  3   4    5   6    7  8  9  len=10
+	// [] [] [] []  []  []  []   [] [] []
+	// ofset=0..5   ^^ - по сути начальное значение индекса
+	// limit=3      3    2   1  - количество обьектов возврата
+
+	if q.offset < 0 || q.offset >= q.Len() {
+		return nil, errors.New("out of range offset")
+	}
+
+	if q.offset+q.limit > q.Len() {
+		return nil, errors.New("out of range offset+limitoffset")
+	}
+
+	// или можно  ol []object
+	ol := make([]object, 0)
+
+	o := q.offset
+	l := q.limit
+
+	for index := o; index < q.Len(); index++ {
+		ol = append(ol, q.list[index])
+		l--
+		if l == 0 {
+			break
+		}
+	}
+
+	return ol, nil
+
+}
+
+//
+//
+//
+//
+//
+
+// change pos+=offset
+func (q *query) ListOffset(i int) *query {
+	q.offset = i
+	return q
+}
+
+//
+//
+//
+//
+//
+
+// return list[pos] object and pos++
+func (q *query) ListNextObject() (*object, error) {
+	// [] [] [] []
+	// 0  1  2  3
+	// len = 4 and max pos is 3
+	if q.pos < 0 || q.pos >= q.Len() {
+		return nil, errors.New("out of range")
+	}
+
+	o := &q.list[q.pos]
+	q.pos++
+
+	return o, nil
+}
+
+//
+//
+//
+//
+//
+
+// get *object[pos]
+func (q *query) ListGetObject(i int) *object {
+	if i < 0 || i >= len(q.list) {
+		return nil
+	}
+
+	return &q.list[i]
+}
+
+//
+//
+//
+//
+//
+
+// pos++
+func (q *query) ListPosIncrease() *query {
+	q.pos++
+	return q
+}
+
+//
+//
+//
+//
+//
+
+// pos--
+func (q *query) ListPosDecrease() *query {
+	q.pos--
+	return q
+}
+
+//
+//
+//
+//
+//
+
+//
+//
+//
+//
+//
+
+// return *object[id] from result map
+func (q *query) FidnID(id string) (object, error) {
+	q.Lock()
+	defer q.Unlock()
+
+	if o, ok := q.result[id]; ok {
+		return o, nil
+	}
+
+	return object{
+		coords: coords{
+			Lat:  0,
+			Long: 0,
+		},
+		Id:          "",
+		ContentType: "",
+		Description: "",
+		Js:          "",
+	}, errors.New("no id")
+
+}
+
+//
+//
+//
+//
+//
+
+// internal func for update list from map \n
+// q.list[]=nil
+// порядок элементов в [] меняется изза карты
+func (q *query) ListUpdate() *query {
+	println("updateList")
+	q.pos = 0
+	// clear list[]
+	q.list = nil
+
+	for _, v := range q.result {
+		q.list = append(q.list, v)
+	}
+	println("end updateList")
+
+	return q
+}
+
+//
+//
+//  !SORT ПУСТЬ ВОЗВРАЩАЕТ НОВЫЙ []object - не из себя
+//
+//
+
+// sort list[] by distance to point from min to max distance
+func (q *query) ListSort(p coords) *query {
+	q.Lock()
+	defer q.Unlock()
+
+	q.ListUpdate()
+
+	sort.Slice(q.list,
+		func(i int, j int) bool {
+			p1 := q.list[i].coords
+			p2 := q.list[j].coords
+			d1 := DistanceBetween(p1, p)
+			d2 := DistanceBetween(p2, p)
+			return d1 < d2
+		})
+
+	return q
+}
+
+//
+//
+//
+//
+//
+
+// Len return int number of objects in list[]ibject
+func (q *query) Len() int {
+	return len(q.list)
+}
+
+//
+//
+//
+//
+//
+
+//	Return copy  []object
+//
+// GetList - use it after UpdateList() or Sort()
+func (q *query) GetListAll() (ol []object) {
+	// q.UpdateList()  // сбросит если перед ним было Sort() !!!
+	return q.list
+}
+
+//
+//
+//
+//
+//
+
+// return objects that in radius  point1, radius=r  meters
+// and delete all another
+func (q *query) WhereInRadius(p1 coords, radius int64) *query {
+	q.Lock()
+	defer q.Unlock()
 	for k, v := range q.result {
-		fieldValue := v.GetField(jspath) //get value of field
-		if !strings.Contains(fieldValue, substring) {
-			q.Lock()
+		if !v.InRadius(p1, radius) {
 			delete(q.result, k)
-			q.Unlock()
 		}
 	}
 
 	return q
 }
 
+//
+//
+//
+//
+//
+
+// return objects that in rect point1, point2
+// and delete all another
+func (q *query) WhereInRect(p1, p2 coords) *query {
+	q.Lock()
+	defer q.Unlock()
+	for k, v := range q.result {
+		if !v.InRect(p1, p2) {
+			delete(q.result, k)
+		}
+	}
+
+	return q
+}
+
+//
+//
+//
+//
+//
+
+// get all where Field string contain substring.
+// and remove all another objects from result map
+func (q *query) WhereContain(jspath, substring string) *query {
+	println("")
+	println(" func contain", jspath, substring)
+
+	for k, v := range q.result {
+
+		v.Print()
+
+		fieldValue := v.GetField(jspath) //get value of field
+		println("country=", fieldValue)
+
+		if !strings.Contains(fieldValue, substring) {
+			q.Lock()
+			delete(q.result, k)
+			q.Unlock()
+		}
+
+	}
+
+	return q
+}
+
+//
+//
+//
+//
+//
+
 // remove from map all != contentype
-func (q *query) ContentType(value string) *query {
+func (q *query) WhereContentType(value string) *query {
 	println("  func  ContentType= ", value)
 
 	for k, v := range q.result {
@@ -348,8 +478,31 @@ func (q *query) ContentType(value string) *query {
 	return q
 }
 
+//
+//
+//
+//
+//
+
+// WhereId find one object with unique id (uuid)
+// and delete all another
+func (q *query) WhereID(id string) *query {
+	println("  func  WhereID ", id)
+
+	for k := range q.result {
+		if k != id {
+			q.Lock()
+			delete(q.result, k)
+			q.Unlock()
+		}
+	}
+
+	println(" end func WhereID")
+	return q
+}
+
 // remove from map all illegal objects
-func (q *query) Where(jspath, value string) *query {
+func (q *query) WhereField(jspath, value string) *query {
 	println("  func  Where ", jspath, " = ", value)
 	for k, v := range q.result {
 		if !v.Equals(jspath, value) {
@@ -363,12 +516,18 @@ func (q *query) Where(jspath, value string) *query {
 	return q
 }
 
+//
+//
+//
+//
+//
+
 // print query result list
 func (q *query) Print() *query {
 	println("")
 	println("  print list. ")
 
-	// q.updatelist() - иначе лист обьектов перемешается при обновлении из карты
+	// если q.updatelist() то  обьекты  перемешается при обновлении из карты
 
 	if q.list == nil {
 		return q
@@ -381,6 +540,12 @@ func (q *query) Print() *query {
 	return q
 }
 
+//
+//
+//
+//
+//
+
 // print Map
 
 // print query result list
@@ -388,6 +553,7 @@ func (q *query) PrintMap() *query {
 	println("")
 	println("  print map")
 	for k, v := range q.result {
+		println("")
 		println(k)
 		v.Print()
 	}
